@@ -108,6 +108,7 @@ footer{text-align:center;color:#70819f;font-size:11px;padding:22px}
 <button data-page="threeD">3D Result</button>
 <button data-page="titli">Titli Goda</button>
 <button data-page="history">Result History</button>
+<button data-page="future">Future Results</button>
 <button data-page="schedule">Schedule</button>
 <button data-page="settings">Settings</button>
 </nav>
@@ -210,6 +211,11 @@ footer{text-align:center;color:#70819f;font-size:11px;padding:22px}
 <div class="card"><h3>Latest Titli Goda result</h3><div id="latestTitli" class="empty">अभी कोई परिणाम प्रकाशित नहीं है।</div></div>
 </section>
 
+<section class="page" id="future">
+ <div class="heading"><div><h1>Future Results</h1><div class="sub">आने वाले draw के परिणाम देखें और समय से पहले edit करें</div></div></div>
+ <div class="card"><p class="sub">यह सूची GitHub Actions द्वारा बनाए गए scheduled draws दिखाती है। Published परिणाम edit नहीं किए जा सकते।</p><div class="tablewrap"><table><thead><tr><th>Draw time</th><th>Section</th><th>Result</th><th>Status</th><th>Action</th></tr></thead><tbody id="futureRows"></tbody></table></div><div id="futureEmpty" class="empty">अभी Future Results नहीं बने हैं। GitHub Actions workflow चलने के बाद यहाँ दिखेंगे।</div></div>
+</section>
+
 <section class="page" id="history">
 <div class="heading">
 <div><h1>Result History</h1><div class="sub">Firebase में सेव सभी प्रकाशित रिकॉर्ड</div></div>
@@ -296,6 +302,8 @@ let selectedTitli = -1;
 let schedule = {start:"09:00",end:"22:00",i2:15,i3:15,it:5};
 let historyListener = null;
 let settingsListener = null;
+let futureListener = null;
+let futureRecords = {};
 let clockTimer = null;
 
 function msg(t){
@@ -821,6 +829,36 @@ async function saveSchedule(){
    renderUpcoming();
    alert("Schedule settings Firebase में save हो गईं।");
  }catch(e){alert("Settings error: "+e.message);}
+}
+
+function futureResultText(item){
+ if(item.type==="2D Fourth")return Array.isArray(item.result)?item.result.join(", "):"Invalid 2D data";
+ if(item.type==="3D Result")return item.result?`A ${item.result.A} / B ${item.result.B} / C ${item.result.C}`:"Invalid 3D data";
+ return item.result?`${item.result.emoji||""} ${item.result.name||""}`:"Invalid result";
+}
+function renderFutureResults(){
+ const body=document.getElementById("futureRows"); if(!body)return;
+ const entries=Object.entries(futureRecords).filter(([,v])=>v).sort((a,b)=>(a[1].drawAt||0)-(b[1].drawAt||0)).slice(0,150);
+ body.innerHTML=entries.map(([key,item])=>`<tr><td>${escapeHTML(fmt(item.drawAt||Date.now()))}</td><td>${escapeHTML(item.type||"")}</td><td style="max-width:320px;white-space:normal">${escapeHTML(futureResultText(item))}</td><td><span class="pill">${escapeHTML(item.status||"scheduled")}</span></td><td>${item.status==="scheduled" && item.drawAt>Date.now()?`<button class="smallbtn" onclick="editFutureResult('${escapeHTML(key)}')">Edit</button>`:"—"}</td></tr>`).join("");
+ document.getElementById("futureEmpty").style.display=entries.length?"none":"block";
+}
+async function editFutureResult(key){
+ const item=futureRecords[key]; if(!item||item.status!=="scheduled"||item.drawAt<=Date.now()){alert("यह draw edit नहीं किया जा सकता।");return;}
+ let result;
+ if(item.type==="2D Fourth"){
+  const text=prompt("30 चार-अंकों के नंबर comma से अलग करके लिखें। Prefix क्रम: 10–19, 30–39, 50–59 (हर prefix एक बार)।",(item.result||[]).join(","));
+  if(text===null)return; result=text.split(",").map(x=>x.trim());
+  const expected=[...Array.from({length:10},(_,i)=>String(10+i)),...Array.from({length:10},(_,i)=>String(30+i)),...Array.from({length:10},(_,i)=>String(50+i))];
+  if(result.length!==30||result.some(x=>!/^[0-9]{4}$/.test(x))||expected.some(p=>result.filter(x=>x.slice(0,2)===p).length!==1)){alert("गलत 2D डेटा। सभी 30 नंबर चार अंकों के हों और हर तय prefix ठीक एक बार हो।");return;}
+ }else if(item.type==="3D Result"){
+  const text=prompt("A,B,C के 3-अंकों के नंबर comma से लिखें।",[item.result.A,item.result.B,item.result.C].join(","));
+  if(text===null)return;const a=text.split(",").map(x=>x.trim());if(a.length!==3||a.some(x=>!/^[0-9]{3}$/.test(x))){alert("A, B और C के लिए तीन 3-अंकों के नंबर जरूरी हैं।");return;}result={A:a[0],B:a[1],C:a[2]};
+ }else{
+  const names=symbols.map(x=>x[1]);const text=prompt("Titli Goda विकल्प का नाम लिखें: "+names.join(", "),item.result.name);if(text===null)return;const idx=symbols.findIndex(x=>x[1].toLowerCase()===text.trim().toLowerCase());if(idx<0){alert("यह विकल्प सूची में नहीं है।");return;}result={emoji:symbols[idx][0],name:symbols[idx][1]};
+ }
+ if(!confirm("इस future draw का परिणाम अपडेट करें?"))return;
+ try{await db.ref(ROOT+"/futureDraws/"+key).update({result,editedAt:Date.now(),editedBy:auth.currentUser.uid});await db.ref(ROOT+"/auditLog").push({action:"EDIT_FUTURE_DRAW",drawKey:key,type:item.type,timestamp:Date.now(),adminUID:auth.currentUser.uid});alert("Future result अपडेट हो गया।");}
+ catch(e){alert("Edit error: "+e.message);}
 }
 
 function exportCSV(){
