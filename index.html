@@ -27,7 +27,7 @@ header{position:sticky;top:0;z-index:5;background:#0b1224ee;border-bottom:1px so
 .stat small{color:var(--muted)}.stat strong{display:block;font-size:25px;margin-top:6px}
 .card{margin-bottom:14px}.card h3{margin:0 0 12px;font-size:16px}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
-button,.btn{cursor:pointer;border:0;border-radius:9px;padding:10px 13px;font-weight:700;background:var(--blue);color:white}
+button{cursor:pointer;border:0;border-radius:9px;padding:10px 13px;font-weight:700;background:var(--blue);color:white}
 .secondary{background:#263653;color:#e5edff}.success{background:#087f62}.danger{background:#a52d46}
 .smallbtn{padding:7px 10px;font-size:12px}
 input,select{width:100%;background:#091225;border:1px solid #344663;border-radius:9px;color:white;padding:11px;font:inherit;outline:none}
@@ -51,8 +51,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}
 th{color:var(--muted);font-weight:600}
 .pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#20304b;color:#bcd0f5;font-size:11px}
-.locked{color:#ffb0bb}.muted{color:var(--muted)}
-.empty{padding:20px;text-align:center;color:var(--muted)}
+.locked{color:#ffb0bb}.empty{padding:20px;text-align:center;color:var(--muted)}
 footer{text-align:center;color:#70819f;font-size:11px;padding:22px}
 #loginScreen{max-width:400px;margin:12vh auto;padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px}
 #loginScreen h2{text-align:center}
@@ -71,10 +70,9 @@ footer{text-align:center;color:#70819f;font-size:11px;padding:22px}
 
 <header>
 <div class="brand">PLAY<span>WIN</span> <small style="font-size:11px;color:#9aabc8">ADMIN</small></div>
-<div class="status" id="connectionStatus">CHECKING...</div>
+<div class="status" id="connectionStatus">LOGIN REQUIRED</div>
 </header>
 
-<!-- ADMIN LOGIN -->
 <div id="loginScreen">
 <h2>PLAYWIN ADMIN</h2>
 <p class="sub" style="text-align:center">Secure administrator login</p>
@@ -86,14 +84,13 @@ footer{text-align:center;color:#70819f;font-size:11px;padding:22px}
 <div id="message"></div>
 </div>
 
-<!-- MAIN APP -->
 <div id="app">
 <div class="wrap">
 
 <div class="notice">
 <b>Firebase Admin Panel:</b>
 यह पैनल Firebase Authentication और Realtime Database से जुड़ा है।
-सभी परिणाम Admin द्वारा प्रकाशित किए जाते हैं। प्रकाशित History को इस पैनल में edit या delete करने का विकल्प नहीं है।
+सभी परिणाम Admin द्वारा प्रकाशित किए जाते हैं।
 </div>
 
 <nav class="nav" id="nav">
@@ -220,7 +217,7 @@ footer{text-align:center;color:#70819f;font-size:11px;padding:22px}
 <div><label>Titli Goda interval (minutes)</label><input id="intervalTitli" type="number" min="1" value="5"></div>
 </div>
 <button style="margin-top:14px" onclick="saveSchedule()">Save schedule settings</button>
-<p class="sub">ये समय केवल अगले draw की गणना करते हैं। ब्राउज़र बंद होने पर अपने आप परिणाम प्रकाशित करने के लिए अलग server-side scheduler आवश्यक है।</p>
+<p class="sub">ये समय केवल अगले draw की गणना करते हैं। ब्राउज़र बंद होने पर automatic publishing के लिए server-side scheduler चाहिए।</p>
 </div>
 </section>
 
@@ -228,7 +225,7 @@ footer{text-align:center;color:#70819f;font-size:11px;padding:22px}
 <div class="heading"><div><h1>Settings</h1><div class="sub">Admin account and Firebase connection</div></div></div>
 <div class="card">
 <h3>Admin security</h3>
-<p class="sub">Firebase Authentication से लॉगिन सुरक्षित है। Database Rules केवल अधिकृत Admin UID को access देती हैं।</p>
+<p class="sub">Firebase Authentication से लॉगिन सुरक्षित है।</p>
 <p><span class="pill">Authentication: Firebase</span> <span class="pill">Database: Realtime Database</span></p>
 <button class="danger" onclick="logout()">Logout</button>
 </div>
@@ -247,7 +244,6 @@ footer{text-align:center;color:#70819f;font-size:11px;padding:22px}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <script>
-// FIREBASE CONFIG
 const firebaseConfig = {
  apiKey: "AIzaSyAvQ7A75xXsLMJU3KggC_2BcMsf1dQS2kc",
  authDomain: "playwinlotto-e5808.firebaseapp.com",
@@ -258,7 +254,6 @@ const firebaseConfig = {
  appId: "1:195315009776:web:30dfd6850a5cfa7f205a35"
 };
 
-// ADMIN DETAILS
 const ADMIN_USER_ID = "2580";
 const ADMIN_EMAIL = "gajjupatel7742@gmail.com";
 const ADMIN_UID = "522wETOBMPWJlYZ6K6I1NYqclwI3";
@@ -266,8 +261,8 @@ const ADMIN_UID = "522wETOBMPWJlYZ6K6I1NYqclwI3";
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-
 const ROOT = "playwinV2";
+
 const symbols = [
  ['🐘','Elephant'],['🍎','Fruits'],['☂️','Umbrella'],
  ['☀️','Sun'],['👧','Girl'],['🐄','Cow'],
@@ -280,6 +275,7 @@ let selectedTitli = -1;
 let schedule = {start:"09:00",end:"22:00",i2:15,i3:15,it:5};
 let historyListener = null;
 let settingsListener = null;
+let clockTimer = null;
 
 function msg(t){
  document.getElementById("message").textContent=t;
@@ -299,7 +295,10 @@ function login(){
  }
 
  msg("Logging in...");
- auth.signInWithEmailAndPassword(ADMIN_EMAIL,password)
+
+ // IMPORTANT: Login session is not saved after page reload.
+ auth.setPersistence(firebase.auth.Auth.Persistence.NONE)
+ .then(()=>auth.signInWithEmailAndPassword(ADMIN_EMAIL,password))
  .then(async credential=>{
   if(credential.user.uid!==ADMIN_UID){
    await auth.signOut();
@@ -313,17 +312,21 @@ function login(){
  });
 }
 
-auth.onAuthStateChanged(user=>{
- if(user){
-  if(user.uid===ADMIN_UID){
+// NONE persistence means the login is only kept in this page session.
+auth.setPersistence(firebase.auth.Auth.Persistence.NONE)
+.then(()=>{
+ auth.onAuthStateChanged(user=>{
+  if(user && user.uid===ADMIN_UID){
    openApp();
   }else{
-   auth.signOut();
+   if(user)auth.signOut();
    showLogin();
   }
- }else{
-  showLogin();
- }
+ });
+})
+.catch(error=>{
+ msg("Authentication error: "+error.message);
+ showLogin();
 });
 
 function showLogin(){
@@ -341,7 +344,9 @@ function openApp(){
 }
 
 function logout(){
- auth.signOut();
+ auth.signOut().then(()=>{
+  showLogin();
+ });
 }
 
 function initUI(){
@@ -377,13 +382,14 @@ function initUI(){
   if(!document.getElementById(id).value)
    document.getElementById(id).value=localDateValue();
  });
+
+ if(!clockTimer)clockTimer=setInterval(tick,1000);
  tick();
- setInterval(tick,1000);
 }
 
 function startData(){
- if(historyListener) db.ref(ROOT+"/history").off("value",historyListener);
- if(settingsListener) db.ref(ROOT+"/settings").off("value",settingsListener);
+ if(historyListener)db.ref(ROOT+"/history").off("value",historyListener);
+ if(settingsListener)db.ref(ROOT+"/settings").off("value",settingsListener);
 
  historyListener=snap=>{
   const data=snap.val()||{};
@@ -391,6 +397,7 @@ function startData(){
   records.sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
   render();
  };
+
  db.ref(ROOT+"/history").on("value",historyListener,error=>{
   alert("History read error: "+error.message);
  });
@@ -411,6 +418,7 @@ function startData(){
   document.getElementById("intervalTitli").value=schedule.it;
   renderUpcoming();
  };
+
  db.ref(ROOT+"/settings").on("value",settingsListener);
 }
 
@@ -459,17 +467,14 @@ async function addRecord(type,result,ref,time){
  const historyRef=db.ref(ROOT+"/history").push();
  const updates={};
  updates[ROOT+"/history/"+historyRef.key]=record;
- updates[ROOT+"/current/"+type]={
-  ...record,
-  historyKey:historyRef.key
- };
- updates[ROOT+"/auditLog"].push({
+ updates[ROOT+"/current/"+type]={...record,historyKey:historyRef.key};
+ updates[ROOT+"/auditLog/"+db.ref(ROOT+"/auditLog").push().key]={
   action:"PUBLISH",
   type:type,
   historyKey:historyRef.key,
   timestamp:now,
   adminUID:ADMIN_UID
- });
+ };
 
  await db.ref().update(updates);
 }
@@ -519,4 +524,173 @@ async function publishTitli(){
  try{
   await addRecord("Titli Goda",
    {emoji:symbols[selectedTitli][0],name:symbols[selectedTitli][1]},
-                    
+   document.getElementById("titliref").value,
+   document.getElementById("titlitime").value);
+  selectedTitli=-1;
+  document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+  alert("Titli Goda result Firebase में publish हो गया।");
+ }catch(e){alert("Publish error: "+e.message);}
+}
+
+function reset2D(){
+ document.querySelectorAll("#twoDgrid input").forEach(x=>x.value="");
+ document.getElementById("twoDref").value="";
+}
+function reset3D(){
+ ["valA","valB","valC","threeDref"].forEach(id=>document.getElementById(id).value="");
+}
+function clearTitli(){
+ selectedTitli=-1;
+ document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+}
+
+function displayResult(r){
+ if(r.type==="2D Fourth"){
+  return r.result.map((v,i)=>
+   '<span class="numcell '+(i<10?"green":i<20?"orange":"purple")+'">'+escapeHTML(v)+'</span>'
+  ).join("");
+ }
+ if(r.type==="3D Result"){
+  return "A: "+escapeHTML(r.result.A)+" · B: "+escapeHTML(r.result.B)+" · C: "+escapeHTML(r.result.C);
+ }
+ return escapeHTML(r.result.emoji)+" "+escapeHTML(r.result.name);
+}
+
+function render(){
+ document.getElementById("totalCount").textContent=records.length;
+ document.getElementById("count2d").textContent=records.filter(r=>r.type==="2D Fourth").length;
+ document.getElementById("count3d").textContent=records.filter(r=>r.type==="3D Result").length;
+ document.getElementById("countTitli").textContent=records.filter(r=>r.type==="Titli Goda").length;
+
+ let a=records.find(r=>r.type==="2D Fourth");
+ let b=records.find(r=>r.type==="3D Result");
+ let c=records.find(r=>r.type==="Titli Goda");
+
+ document.getElementById("latest2d").innerHTML=a?
+  '<div class="drawgrid">'+displayResult(a)+'</div><p class="sub">'+fmt(a.time)+'</p>':
+  "अभी कोई परिणाम प्रकाशित नहीं है।";
+
+ document.getElementById("latest3d").innerHTML=b?
+  '<div class="resultrow">'+["A","B","C"].map(k=>
+   '<div class="resultbox"><b>'+k+'</b><strong style="font-size:25px">'+escapeHTML(b.result[k])+'</strong></div>'
+  ).join("")+'</div><p class="sub">'+fmt(b.time)+'</p>':
+  "अभी कोई परिणाम प्रकाशित नहीं है।";
+
+ document.getElementById("latestTitli").innerHTML=c?
+  '<div style="font-size:34px">'+escapeHTML(c.result.emoji)+'</div><b>'+escapeHTML(c.result.name)+'</b><p class="sub">'+fmt(c.time)+'</p>':
+  "अभी कोई परिणाम प्रकाशित नहीं है।";
+
+ renderHistory();
+ renderUpcoming();
+}
+
+function renderHistory(){
+ let body=document.getElementById("historyRows");
+ body.innerHTML=records.map(r=>{
+  let result=r.type==="2D Fourth"?r.result.join(", "):
+   r.type==="3D Result"?
+   "A "+r.result.A+" / B "+r.result.B+" / C "+r.result.C:
+   r.result.emoji+" "+r.result.name;
+
+  return "<tr><td>"+fmt(r.time)+"</td><td>"+escapeHTML(r.type)+
+   "</td><td>"+escapeHTML(result)+"</td><td>"+escapeHTML(r.ref||"—")+
+   '</td><td><span class="pill locked">Published</span></td></tr>';
+ }).join("");
+
+ document.getElementById("historyEmpty").style.display=records.length?"none":"block";
+}
+
+function nextTime(interval){
+ let now=new Date(),d=new Date(now);
+ let [sh,sm]=schedule.start.split(":").map(Number);
+ let [eh,em]=schedule.end.split(":").map(Number);
+ let start=new Date(now),end=new Date(now);
+ start.setHours(sh,sm,0,0);
+ end.setHours(eh,em,0,0);
+
+ if(now>end){
+  start.setDate(start.getDate()+1);
+  return start;
+ }
+ if(now<start)return start;
+
+ let mins=now.getHours()*60+now.getMinutes();
+ let base=sh*60+sm;
+ let next=base+(Math.floor((mins-base)/interval)+1)*interval;
+
+ d.setHours(Math.floor(next/60),next%60,0,0);
+ if(d>end){
+  d.setDate(d.getDate()+1);
+  d.setHours(sh,sm,0,0);
+ }
+ return d;
+}
+
+function renderUpcoming(){
+ let rows=[["2D Fourth",schedule.i2],["3D Result",schedule.i3],["Titli Goda",schedule.it]];
+ document.getElementById("upcoming").innerHTML=rows.map(x=>
+  "<tr><td>"+x[0]+"</td><td>"+x[1]+" minutes</td><td>"+
+  nextTime(x[1]).toLocaleString("en-IN",{
+   timeZone:"Asia/Kolkata",hour:"2-digit",minute:"2-digit",
+   day:"2-digit",month:"short"
+  })+"</td></tr>"
+ ).join("");
+}
+
+function tick(){
+ document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-IN",{
+  timeZone:"Asia/Kolkata",hour12:true
+ });
+ renderUpcoming();
+}
+
+async function saveSchedule(){
+ let start=document.getElementById("startTime").value||"09:00";
+ let end=document.getElementById("endTime").value||"22:00";
+ let i2=Math.max(1,+document.getElementById("interval2d").value||15);
+ let i3=Math.max(1,+document.getElementById("interval3d").value||15);
+ let it=Math.max(1,+document.getElementById("intervalTitli").value||5);
+
+ if(start>=end){
+  alert("End time, Start time से आगे होना चाहिए।");
+  return;
+ }
+
+ try{
+  await db.ref(ROOT+"/settings").update({
+   timezone:"Asia/Kolkata",
+   startTime:start,
+   endTime:end,
+   interval2D:i2,
+   interval3D:i3,
+   intervalTitli:it
+  });
+  alert("Schedule settings Firebase में save हो गईं।");
+ }catch(e){alert("Settings error: "+e.message);}
+}
+
+function exportCSV(){
+ let rows=[["Date & time","Section","Result","Reference","Status"]];
+ records.forEach(r=>{
+  let result=r.type==="2D Fourth"?r.result.join(" "):
+   r.type==="3D Result"?
+   "A "+r.result.A+" B "+r.result.B+" C "+r.result.C:
+   r.result.name;
+  rows.push([fmt(r.time),r.type,result,r.ref||"","Published"]);
+ });
+
+ let csv=rows.map(row=>row.map(v=>
+  '"'+String(v).replace(/"/g,'""')+'"'
+ ).join(",")).join("\n");
+
+ let blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});
+ let url=URL.createObjectURL(blob);
+ let a=document.createElement("a");
+ a.href=url;
+ a.download="playwin-result-history.csv";
+ a.click();
+ URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
