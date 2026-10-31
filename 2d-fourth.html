@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d18">
+<title>PlayWin - 2D Fourth</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d18;color:#fff;font-family:Arial,sans-serif;padding-bottom:30px}
+header{background:#101b2b;padding:16px;border-bottom:1px solid #293a52}
+.brand{font-size:23px;font-weight:900}
+.brand span{color:#28c9ee}
+main{max-width:760px;margin:auto;padding:15px}
+.card{background:#111e30;border:1px solid #30435e;border-radius:15px;padding:15px;margin:14px 0}
+h1{font-size:21px}
+h2{font-size:17px;margin:0 0 12px}
+.muted{color:#9aabc3;font-size:12px}
+label{display:block;font-size:12px;color:#bdc9da;margin:12px 0 6px}
+input,select{width:100%;padding:11px;background:#091321;color:white;border:1px solid #405168;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:12px}
+.cell{text-align:center;font-weight:bold;padding:11px 1px!important;border-radius:4px;font-size:13px}
+.g{background:#078d4a}.o{background:#ed9200}.p{background:#8615d7}
+button{padding:12px;border:0;border-radius:9px;background:#e92736;color:white;font-weight:bold}
+.secondary{background:#1a2b41;border:1px solid #40536d}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.full{width:100%;margin-top:12px}
+.notice{background:#302819;border:1px solid #6c552c;padding:11px;border-radius:9px;font-size:12px;color:#f5d79c}
+.historyrow{padding:12px 0;border-bottom:1px solid #293a52;font-size:13px}
+@media(min-width:600px){.grid{grid-template-columns:repeat(10,1fr)}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">▶ Play<span>Win</span></div>
+<div class="muted">2D FOURTH MANAGEMENT</div>
+</header>
+<main>
+<h1>2D Result - Fourth</h1>
+<p class="muted">10 Columns × 3 Rows = 30 Numbers</p>
+
+<div class="notice">
+केवल सत्यापित आधिकारिक परिणाम दर्ज करें।
+प्रकाशित परिणामों को बाद में बदलने की सुविधा नहीं होगी।
+</div>
+
+<div class="card">
+<h2>Upcoming Draw</h2>
+<div id="next" style="font-size:28px;font-weight:bold">--:--</div>
+<p class="muted">IST | 09:00 AM - 10:00 PM | 15 Minutes</p>
+
+<label>Draw Time</label>
+<select id="drawTime"></select>
+
+<label>Official Result Reference</label>
+<input id="source" placeholder="Official source / reference ID">
+</div>
+
+<div class="card">
+<h2>Enter 30 Results</h2>
+<p class="muted">हर नंबर में ठीक 4 अंक भरें।</p>
+<div class="grid" id="grid"></div>
+
+<div class="row">
+<button class="secondary" id="clear">Clear All</button>
+<button id="validate">Validate</button>
+</div>
+
+<button class="full" id="publish">Save Verified Result</button>
+<p class="muted" id="status">Draft not saved</p>
+</div>
+
+<div class="card">
+<h2>Published History 🔒</h2>
+<div id="history" class="muted">No records yet</div>
+</div>
+
+<p class="muted"><a href="index.html" style="color:#55c9ee">← Back to Dashboard</a></p>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY="playwin_2d_verified_history";
+
+function nextDraw(){
+let now=new Date();
+let m=now.getHours()*60+now.getMinutes();
+let t=m<540?540:m>=1320?1980:Math.ceil(m/15)*15;
+let d=new Date(now);
+d.setHours(Math.floor(t/60),t%60,0,0);
+return d;
+}
+
+function format(d){
+return d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+}
+
+function setupTimes(){
+let base=nextDraw();
+$("next").textContent=format(base);
+$("drawTime").innerHTML="";
+for(let i=0;i<52;i++){
+let d=new Date(base.getTime()+i*15*60000);
+if(d.getHours()>22||(d.getHours()===22&&d.getMinutes()>0))break;
+let s=format(d);
+$("drawTime").add(new Option(s,s));
+}
+}
+
+function setupGrid(){
+let grid=$("grid");
+for(let r=0;r<3;r++){
+for(let c=0;c<10;c++){
+let x=document.createElement("input");
+x.className="cell "+["g","o","p"][r];
+x.maxLength=4;
+x.inputMode="numeric";
+x.placeholder=String(r*10+c+1).padStart(2,"0");
+x.addEventListener("input",()=>{
+x.value=x.value.replace(/\D/g,"").slice(0,4);
+});
+grid.appendChild(x);
+}
+}
+}
+
+function getHistory(){
+try{return JSON.parse(localStorage.getItem(KEY)||"[]")}
+catch{return []}
+}
+
+function renderHistory(){
+let records=getHistory();
+$("history").innerHTML=records.length?
+records.map(r=>`
+<div class="historyrow">
+<b>${r.time}</b> — 🔒 LOCKED
+<br><span class="muted">${r.date}</span>
+</div>`).join(""):"No records yet";
+}
+
+$("clear").onclick=()=>{
+document.querySelectorAll(".cell").forEach(x=>x.value="");
+$("status").textContent="All fields cleared";
+};
+
+$("validate").onclick=()=>{
+let values=[...document.querySelectorAll(".cell")].map(x=>x.value);
+if(values.some(v=>!/^\d{4}$/.test(v))){
+alert("सभी 30 नंबर में 4 अंक भरें");
+return;
+}
+alert("Validation successful");
+};
+
+$("publish").onclick=()=>{
+let values=[...document.querySelectorAll(".cell")].map(x=>x.value);
+let source=$("source").value.trim();
+
+if(values.some(v=>!/^\d{4}$/.test(v))){
+alert("सभी 30 नंबर भरें");
+return;
+}
+if(!source){
+alert("Official reference भरें");
+return;
+}
+
+let records=getHistory();
+records.unshift({
+values,
+source,
+time:$("drawTime").value,
+date:new Date().toLocaleDateString("en-IN"),
+publishedAt:Date.now()
+});
+
+localStorage.setItem(KEY,JSON.stringify(records));
+document.querySelectorAll(".cell").forEach(x=>x.disabled=true);
+$("publish").disabled=true;
+$("status").textContent="Saved locally and locked";
+renderHistory();
+alert("Result saved locally");
+};
+
+setupTimes();
+setupGrid();
+renderHistory();
+</script>
+</body>
+</html>
