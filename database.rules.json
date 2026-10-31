@@ -1,0 +1,10 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": false,
+    "settings": { ".write": "auth != null && auth.token.admin === true" },
+    "manualNext": { ".write": "auth != null && auth.token.admin === true" },
+    "current": { ".write": false },
+    "history": { ".write": false }
+  }
+}
