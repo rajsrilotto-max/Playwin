@@ -1,13 +1,192 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlayWin Admin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d18">
+<title>PlayWin Admin Dashboard</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#080d18;color:#fff;
+ font-family:Arial,sans-serif;padding-bottom:85px
+}
+header{
+ padding:20px 16px;
+ background:#101b2b;
+ border-bottom:1px solid #26364d
+}
+.brand{font-size:25px;font-weight:900}
+.brand span{color:#26c8ef}
+.small{font-size:11px;color:#9aabc3;letter-spacing:2px}
+.date{color:#9aabc3;font-size:12px;margin-top:10px}
+main{padding:15px;max-width:650px;margin:auto}
+h2{font-size:18px;margin:5px 0 15px}
+.stats{
+ display:grid;grid-template-columns:repeat(3,1fr);gap:8px
+}
+.stat{
+ background:#142238;border:1px solid #293d59;
+ border-radius:12px;padding:13px 7px;text-align:center
+}
+.stat b{font-size:22px;display:block}
+.stat small{color:#aab8ca;font-size:11px}
+.card{
+ background:#111e30;border:1px solid #30435e;
+ border-radius:15px;padding:16px;margin-top:15px
+}
+.green{border-left:4px solid #00d47b}
+.blue{border-left:4px solid #168cff}
+.purple{border-left:4px solid #c02bff}
+.cardhead{
+ display:flex;justify-content:space-between;
+ align-items:center;gap:8px
+}
+.cardhead h3{margin:0;font-size:18px}
+.tag{
+ font-size:11px;padding:6px 9px;
+ border-radius:20px;background:#20334b;color:#bcd4f5
+}
+.time{
+ font-size:29px;font-weight:900;margin:16px 0 3px
+}
+.desc{font-size:12px;color:#9aabc3}
+button{
+ border:0;border-radius:9px;padding:12px;
+ background:#e92736;color:white;font-weight:bold;
+ width:100%;margin-top:14px
+}
+nav{
+ position:fixed;bottom:0;left:0;right:0;
+ display:flex;justify-content:space-around;
+ background:#101b2b;border-top:1px solid #30435e;
+ padding:12px 3px
+}
+nav a{
+ color:#aab8ca;text-decoration:none;
+ text-align:center;font-size:11px
+}
+nav span{display:block;font-size:20px;margin-bottom:4px}
+nav a:first-child{color:#29c9ee}
+@media(min-width:600px){
+ main{max-width:850px}
+ .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+}
+</style>
 </head>
+
 <body>
-  <h1>PlayWin Admin Panel</h1>
-  <p>Project Setup Successful</p>
+
+<header>
+ <div class="brand">▶ Play<span>Win</span></div>
+ <div class="small">ADMIN CONTROL PANEL</div>
+ <div class="date" id="today"></div>
+</header>
+
+<main>
+
+<h2>Dashboard Overview</h2>
+
+<div class="stats">
+ <div class="stat">
+  <b>2D</b>
+  <small>Fourth Result</small>
+ </div>
+ <div class="stat">
+  <b>3D</b>
+  <small>A / B / C</small>
+ </div>
+ <div class="stat">
+  <b>12</b>
+  <small>Titli Options</small>
+ </div>
+</div>
+
+<h2 style="margin-top:25px">Upcoming Draws</h2>
+
+<div class="cards">
+
+<div class="card green">
+ <div class="cardhead">
+  <h3>2D Fourth</h3>
+  <span class="tag">15 Minutes</span>
+ </div>
+ <div class="time" id="time2d">--:--</div>
+ <div class="desc">Next scheduled draw</div>
+ <button>Manage 2D Result</button>
+</div>
+
+<div class="card blue">
+ <div class="cardhead">
+  <h3>3D Result</h3>
+  <span class="tag">15 Minutes</span>
+ </div>
+ <div class="time" id="time3d">--:--</div>
+ <div class="desc">A / B / C Next Draw</div>
+ <button>Manage 3D Result</button>
+</div>
+
+<div class="card purple">
+ <div class="cardhead">
+  <h3>🦋 Titli Goda</h3>
+  <span class="tag">5 Minutes</span>
+ </div>
+ <div class="time" id="timetg">--:--</div>
+ <div class="desc">Next scheduled draw</div>
+ <button>Manage Titli Goda</button>
+</div>
+
+</div>
+
+<div class="card">
+ <h3>System Information</h3>
+ <p class="desc">Operating Hours: 09:00 AM – 10:00 PM</p>
+ <p class="desc">Timezone: India Standard Time (IST)</p>
+ <p class="desc">Old Published Results: Locked</p>
+ <p class="desc">Upcoming Results: Editable</p>
+</div>
+
+</main>
+
+<nav>
+ <a href="#"><span>⌂</span>Home</a>
+ <a href="#"><span>▦</span>Results</a>
+ <a href="#"><span>◷</span>Schedule</a>
+ <a href="#"><span>▤</span>History</a>
+ <a href="#"><span>⚙</span>Settings</a>
+</nav>
+
+<script>
+document.getElementById("today").textContent =
+ new Date().toLocaleDateString("en-IN",{
+ weekday:"long",day:"numeric",month:"long",year:"numeric"
+});
+
+function nextDraw(interval){
+ const now=new Date();
+ const start=9*60,end=22*60;
+ const current=now.getHours()*60+now.getMinutes();
+ let next;
+ if(current<start) next=start;
+ else if(current>=end) next=start+1440;
+ else next=Math.ceil(current/interval)*interval;
+
+ const d=new Date(now);
+ d.setHours(Math.floor(next/60),next%60,0,0);
+ return d.toLocaleTimeString("en-IN",{
+ hour:"2-digit",minute:"2-digit"
+ });
+}
+function updateTimes(){
+ document.getElementById("time2d").textContent=nextDraw(15);
+ document.getElementById("time3d").textContent=nextDraw(15);
+ document.getElementById("timetg").textContent=nextDraw(5);
+}
+updateTimes();
+setInterval(updateTimes,10000);
+</script>
+
 </body>
 </html>
