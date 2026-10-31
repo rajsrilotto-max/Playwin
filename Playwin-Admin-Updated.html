@@ -1,0 +1,924 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1020">
+<title>PlayWin Admin Dashboard</title>
+<style>
+:root{--bg:#080d1b;--panel:#111a2e;--line:#263653;--text:#edf3ff;--muted:#9aabc8;--blue:#5b8cff;--green:#20c997;--orange:#ff9f43;--purple:#a78bfa;--red:#ff647c}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top right,#18264a 0,#080d1b 48%);color:var(--text);font-family:system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:#0b1224ee;border-bottom:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:19px;font-weight:800}.brand span{color:var(--blue)}
+.status{font-size:11px;color:#6ff0c4;border:1px solid #176b55;background:#10352f;padding:5px 8px;border-radius:20px}
+.wrap{max-width:1100px;margin:auto;padding:18px 14px 90px}
+.notice{background:#18243c;border:1px solid #344866;padding:12px;border-radius:12px;color:#c8d7f2;font-size:12px;line-height:1.5;margin-bottom:16px}
+.nav{display:flex;gap:8px;overflow:auto;padding:3px 0 14px}
+.nav button{white-space:nowrap;border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:10px 13px;border-radius:10px;font-weight:650}
+.nav button.active{background:var(--blue);color:white}
+.page{display:none}.page.active{display:block}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0 16px}
+.heading h1{font-size:22px;margin:0}
+.sub{color:var(--muted);font-size:12px;margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat,.card{background:linear-gradient(145deg,var(--panel),#0e1729);border:1px solid var(--line);border-radius:15px;padding:15px}
+.stat small{color:var(--muted)}.stat strong{display:block;font-size:25px;margin-top:6px}
+.card{margin-bottom:14px}.card h3{margin:0 0 12px;font-size:16px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+button{cursor:pointer;border:0;border-radius:9px;padding:10px 13px;font-weight:700;background:var(--blue);color:white}
+.secondary{background:#263653;color:#e5edff}.success{background:#087f62}.danger{background:#a52d46}
+.smallbtn{padding:7px 10px;font-size:12px}
+input,select{width:100%;background:#091225;border:1px solid #344663;border-radius:9px;color:white;padding:11px;font:inherit;outline:none}
+.time-picker{position:relative;width:100%;z-index:1}
+.time-picker.open{z-index:30}
+.time-picker-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;background:#091225;border:1px solid #344663;color:#fff;padding:12px 14px;border-radius:10px;font:inherit;min-height:48px}
+.time-picker-trigger:focus-visible,.time-option:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.time-picker-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;max-height:260px;overflow-y:auto;overscroll-behavior:contain;background:#101b31;border:1px solid #405477;border-radius:12px;padding:6px;box-shadow:0 14px 35px #0009;z-index:50}
+.time-picker.open .time-picker-menu{display:block}
+.time-option{display:block;width:100%;text-align:left;background:transparent;color:#eaf1ff;padding:11px 12px;border-radius:8px;font-size:15px;font-weight:600}
+.time-option:active,.time-option.selected{background:#203b68;color:#fff}
+@media(max-width:700px){.time-picker-menu{max-height:220px}}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.drawgrid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px}
+.numcell{padding:8px 2px;text-align:center;font-weight:800;font-size:13px;border-radius:8px;border:1px solid #ffffff24;background:#14223b}
+.numcell.green{border-color:#20c997;color:#6ff0c4}
+.numcell.orange{border-color:#ff9f43;color:#ffc27f}
+.numcell.purple{border-color:#a78bfa;color:#cbb8ff}
+.resultrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.resultbox{background:#0a1428;border:1px solid var(--line);padding:14px;border-radius:12px;text-align:center}
+.resultbox b{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}
+.resultbox input{text-align:center;font-size:22px;font-weight:800;letter-spacing:2px}
+.options{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.option{border:1px solid var(--line);background:#0d1930;border-radius:10px;padding:12px 6px;text-align:center;font-size:13px}
+.option.selected{border-color:var(--green);background:#10352f}
+.option span{display:block;font-size:22px;margin-bottom:5px}
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600}
+.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#20304b;color:#bcd0f5;font-size:11px}
+.locked{color:#ffb0bb}.empty{padding:20px;text-align:center;color:var(--muted)}
+footer{text-align:center;color:#70819f;font-size:11px;padding:22px}
+#loginScreen{max-width:400px;margin:12vh auto;padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px}
+#loginScreen h2{text-align:center}
+#app{display:none}
+#message{font-size:13px;margin-top:12px;color:#ffb0bb;white-space:pre-wrap}
+@media(max-width:700px){
+.grid{grid-template-columns:repeat(2,1fr)}
+.drawgrid{grid-template-columns:repeat(5,minmax(0,1fr))}
+.options{grid-template-columns:repeat(3,1fr)}
+.heading h1{font-size:19px}
+.formgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="brand">PLAY<span>WIN</span> <small style="font-size:11px;color:#9aabc8">ADMIN</small></div>
+<div class="status" id="connectionStatus">LOGIN REQUIRED</div>
+</header>
+
+<div id="loginScreen">
+<h2>PLAYWIN ADMIN</h2>
+<p class="sub" style="text-align:center">Secure administrator login</p>
+<label>Admin User ID</label>
+<input id="loginId" value="2580" inputmode="numeric" autocomplete="username">
+<label>Password</label>
+<input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password">
+<button class="success" style="width:100%;margin-top:16px" onclick="login()">LOGIN</button>
+<div id="message"></div>
+</div>
+
+<div id="app">
+<div class="wrap">
+
+<div class="notice">
+<b>Firebase Admin Panel:</b>
+यह पैनल Firebase Authentication और Realtime Database से जुड़ा है।
+सभी परिणाम Admin द्वारा प्रकाशित किए जाते हैं।
+</div>
+
+<nav class="nav" id="nav">
+<button class="active" data-page="dashboard">Dashboard</button>
+<button data-page="twoD">2D Fourth</button>
+<button data-page="threeD">3D Result</button>
+<button data-page="titli">Titli Goda</button>
+<button data-page="history">Result History</button>
+<button data-page="future">Future Results</button>
+<button data-page="schedule">Schedule</button>
+<button data-page="settings">Settings</button>
+</nav>
+
+<section class="page active" id="dashboard">
+<div class="heading">
+<div><h1>Dashboard</h1><div class="sub">Results overview · India Standard Time</div></div>
+<span class="pill" id="clock">--:--:--</span>
+</div>
+<div class="grid">
+<div class="stat"><small>Total published</small><strong id="totalCount">0</strong></div>
+<div class="stat"><small>2D results</small><strong id="count2d">0</strong></div>
+<div class="stat"><small>3D results</small><strong id="count3d">0</strong></div>
+<div class="stat"><small>Titli Goda</small><strong id="countTitli">0</strong></div>
+</div>
+<div class="card" style="margin-top:14px">
+<h3>Upcoming draw times</h3>
+<div class="tablewrap">
+<table><thead><tr><th>Section</th><th>Interval</th><th>Next draw (IST)</th></tr></thead><tbody id="upcoming"></tbody></table>
+</div>
+</div>
+<div class="card">
+<h3>Quick actions</h3>
+<div class="actions">
+<button onclick="showPage('twoD')">Manage 2D Fourth</button>
+<button onclick="showPage('threeD')" class="secondary">Manage 3D</button>
+<button onclick="showPage('titli')" class="secondary">Manage Titli Goda</button>
+<button onclick="showPage('history')" class="secondary">View history</button>
+</div>
+</div>
+</section>
+
+<section class="page" id="twoD">
+<div class="heading">
+<div><h1>2D Result – Fourth</h1><div class="sub">10 columns × 3 rows · 30 four-digit values</div></div>
+<span class="pill">15 min interval</span>
+</div>
+<div class="card">
+<div class="formgrid">
+<div><label>Draw date & time (IST)</label><div class="time-picker" id="twoDtimePicker">
+<input type="hidden" id="twoDtime" value="">
+<button type="button" class="time-picker-trigger" id="twoDtimeButton" aria-haspopup="listbox" aria-expanded="false">Loading times <span aria-hidden="true">▾</span></button>
+<div class="time-picker-menu" id="twoDtimeMenu" role="listbox" aria-label="Available draw times"></div>
+</div></div>
+<div><label>Draw reference / note</label><input id="twoDref" placeholder="Draw #001"></div>
+</div>
+<label>Result values — हर value 4 अंकों की हो</label>
+<div class="drawgrid" id="twoDgrid"></div>
+<div class="actions" style="margin-top:14px">
+<button type="button" class="secondary" onclick="generate2DValues()">Generate 30 numbers (10–19 / 30–39 / 50–59)</button>
+<button class="success" onclick="publish2D()">Publish 2D result</button>
+<button class="secondary" onclick="reset2D()">Clear form</button>
+</div>
+</div>
+<div class="card"><h3>Latest 2D result</h3><div id="latest2d" class="empty">अभी कोई परिणाम प्रकाशित नहीं है।</div></div>
+</section>
+
+<section class="page" id="threeD">
+<div class="heading">
+<div><h1>3D Result</h1><div class="sub">तीन कॉलम · प्रत्येक में 3 अंकों का नंबर</div></div>
+<span class="pill">15 min interval</span>
+</div>
+<div class="card">
+<label>Draw date & time (IST)</label><div class="time-picker" id="threeDtimePicker">
+<input type="hidden" id="threeDtime" value="">
+<button type="button" class="time-picker-trigger" id="threeDtimeButton" aria-haspopup="listbox" aria-expanded="false">Loading times <span aria-hidden="true">▾</span></button>
+<div class="time-picker-menu" id="threeDtimeMenu" role="listbox" aria-label="Available draw times"></div>
+</div>
+<label>Draw reference / note</label><input id="threeDref" placeholder="Draw #001">
+<div class="resultrow" style="margin-top:12px">
+<div class="resultbox"><b>RESULT A</b><input id="valA" maxlength="3" inputmode="numeric" placeholder="000"></div>
+<div class="resultbox"><b>RESULT B</b><input id="valB" maxlength="3" inputmode="numeric" placeholder="000"></div>
+<div class="resultbox"><b>RESULT C</b><input id="valC" maxlength="3" inputmode="numeric" placeholder="000"></div>
+</div>
+<div class="actions" style="margin-top:14px">
+<button class="success" onclick="publish3D()">Publish 3D result</button>
+<button class="secondary" onclick="reset3D()">Clear form</button>
+</div>
+</div>
+<div class="card"><h3>Latest 3D result</h3><div id="latest3d" class="empty">अभी कोई परिणाम प्रकाशित नहीं है।</div></div>
+</section>
+
+<section class="page" id="titli">
+<div class="heading">
+<div><h1>Titli Goda</h1><div class="sub">12 उपलब्ध विकल्प · हर draw में एक चयन</div></div>
+<span class="pill">5 min interval</span>
+</div>
+<div class="card">
+<label>Draw date & time (IST)</label><div class="time-picker" id="titlitimePicker">
+<input type="hidden" id="titlitime" value="">
+<button type="button" class="time-picker-trigger" id="titlitimeButton" aria-haspopup="listbox" aria-expanded="false">Loading times <span aria-hidden="true">▾</span></button>
+<div class="time-picker-menu" id="titlitimeMenu" role="listbox" aria-label="Available draw times"></div>
+</div>
+<label>Draw reference / note</label><input id="titliref" placeholder="Draw #001">
+<div class="options" id="titliOptions"></div>
+<div class="actions" style="margin-top:14px">
+<button class="success" onclick="publishTitli()">Publish selected option</button>
+<button class="secondary" onclick="clearTitli()">Clear selection</button>
+</div>
+</div>
+<div class="card"><h3>Latest Titli Goda result</h3><div id="latestTitli" class="empty">अभी कोई परिणाम प्रकाशित नहीं है।</div></div>
+</section>
+
+<section class="page" id="future">
+ <div class="heading"><div><h1>Future Results</h1><div class="sub">आने वाले draw के परिणाम देखें और समय से पहले edit करें</div></div></div>
+ <div class="card"><p class="sub">यह सूची GitHub Actions द्वारा बनाए गए scheduled draws दिखाती है। Published परिणाम edit नहीं किए जा सकते।</p><div class="tablewrap"><table><thead><tr><th>Draw time</th><th>Section</th><th>Result</th><th>Status</th><th>Action</th></tr></thead><tbody id="futureRows"></tbody></table></div><div id="futureEmpty" class="empty">अभी Future Results नहीं बने हैं। GitHub Actions workflow चलने के बाद यहाँ दिखेंगे।</div></div>
+</section>
+
+<section class="page" id="history">
+<div class="heading">
+<div><h1>Result History</h1><div class="sub">Firebase में सेव सभी प्रकाशित रिकॉर्ड</div></div>
+<button class="secondary smallbtn" onclick="exportCSV()">Export CSV</button>
+</div>
+<div class="card">
+<div class="tablewrap">
+<table>
+<thead><tr><th>Date & time</th><th>Section</th><th>Result</th><th>Reference</th><th>Status</th></tr></thead>
+<tbody id="historyRows"></tbody>
+</table>
+</div>
+<div id="historyEmpty" class="empty">अभी कोई रिकॉर्ड नहीं है।</div>
+</div>
+</section>
+
+<section class="page" id="schedule">
+<div class="heading"><div><h1>Draw Schedule</h1><div class="sub">Configured operating window · IST</div></div></div>
+<div class="card">
+<h3>Daily schedule</h3>
+<div class="formgrid">
+<div><label>Start time</label><input id="startTime" type="time" value="09:00"></div>
+<div><label>End time</label><input id="endTime" type="time" value="22:00"></div>
+<div><label>2D interval (minutes)</label><input id="interval2d" type="number" min="1" value="15"></div>
+<div><label>3D interval (minutes)</label><input id="interval3d" type="number" min="1" value="15"></div>
+<div><label>Titli Goda interval (minutes)</label><input id="intervalTitli" type="number" min="1" value="5"></div>
+</div>
+<button style="margin-top:14px" onclick="saveSchedule()">Save schedule settings</button>
+<p class="sub">ये समय केवल अगले draw की गणना करते हैं। ब्राउज़र बंद होने पर automatic publishing के लिए server-side scheduler चाहिए।</p>
+</div>
+</section>
+
+<section class="page" id="settings">
+<div class="heading"><div><h1>Settings</h1><div class="sub">Admin account and Firebase connection</div></div></div>
+<div class="card">
+<h3>Admin security</h3>
+<p class="sub">Firebase Authentication से लॉगिन सुरक्षित है।</p>
+<p><span class="pill">Authentication: Firebase</span> <span class="pill">Database: Realtime Database</span></p>
+<button class="danger" onclick="logout()">Logout</button>
+</div>
+<div class="card">
+<h3>Database location</h3>
+<p class="sub">/playwinV2/current · /playwinV2/history · /playwinV2/auditLog · /playwinV2/settings</p>
+</div>
+</section>
+
+<footer>PlayWin Admin · Firebase · Asia/Kolkata</footer>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+ apiKey: "AIzaSyAvQ7A75xXsLMJU3KggC_2BcMsf1dQS2kc",
+ authDomain: "playwinlotto-e5808.firebaseapp.com",
+ databaseURL: "https://playwinlotto-e5808-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId: "playwinlotto-e5808",
+ storageBucket: "playwinlotto-e5808.firebasestorage.app",
+ messagingSenderId: "195315009776",
+ appId: "1:195315009776:web:30dfd6850a5cfa7f205a35"
+};
+
+const ADMIN_USER_ID = "2580";
+const ADMIN_EMAIL = "gajjupatel7742@gmail.com";
+const ADMIN_UID = "522wETOBMPWJlYZ6K6I1NYqclwI3";
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+const ROOT = "playwinV2";
+
+const symbols = [
+ ['🐘','Elephant'],['🍎','Fruits'],['☂️','Umbrella'],
+ ['☀️','Sun'],['👧','Girl'],['🐄','Cow'],
+ ['🐘','Elephant'],['🦁','Lion'],['🐅','Tiger'],
+ ['🍎','Apple'],['🍌','Banana'],['🥭','Mango']
+];
+
+let records = [];
+let selectedTitli = -1;
+let schedule = {start:"09:00",end:"22:00",i2:15,i3:15,it:5};
+let historyListener = null;
+let settingsListener = null;
+let futureListener = null;
+let futureRecords = {};
+let clockTimer = null;
+
+function msg(t){
+ document.getElementById("message").textContent=t;
+}
+
+let loginGranted = false;
+
+// हर बार पेज खुलने पर पुराने Firebase session को बंद करके Login दिखाएँ।
+auth.setPersistence(firebase.auth.Auth.Persistence.NONE)
+.then(()=>auth.signOut())
+.then(()=>showLogin())
+.catch(error=>{
+ showLogin();
+ msg("Authentication error: "+error.message);
+});
+
+async function login(){
+ const id=document.getElementById("loginId").value.trim();
+ const password=document.getElementById("loginPassword").value;
+
+ if(id!==ADMIN_USER_ID){
+  msg("गलत Admin User ID");
+  return;
+ }
+ if(!password){
+  msg("Password दर्ज करें");
+  return;
+ }
+
+ msg("Logging in...");
+
+ try{
+  await auth.setPersistence(firebase.auth.Auth.Persistence.NONE);
+  const credential=await auth.signInWithEmailAndPassword(ADMIN_EMAIL,password);
+
+  if(credential.user.uid!==ADMIN_UID){
+   await auth.signOut();
+   loginGranted=false;
+   throw new Error("यह अकाउंट अधिकृत Admin नहीं है।");
+  }
+
+  loginGranted=true;
+  msg("");
+  openApp();
+ }catch(error){
+  loginGranted=false;
+  msg("Login failed: "+error.message);
+ }
+}
+
+function showLogin(){
+ document.getElementById("app").style.display="none";
+ document.getElementById("loginScreen").style.display="block";
+ document.getElementById("connectionStatus").textContent="LOGIN REQUIRED";
+}
+
+function openApp(){
+ if(!loginGranted){
+  showLogin();
+  return;
+ }
+ document.getElementById("loginScreen").style.display="none";
+ document.getElementById("app").style.display="block";
+ document.getElementById("connectionStatus").textContent="FIREBASE CONNECTED";
+ initUI();
+ startData();
+}
+
+function logout(){
+ loginGranted=false;
+ auth.signOut().then(()=>{
+  showLogin();
+ });
+}
+
+function initUI(){
+ const g=document.getElementById("twoDgrid");
+ if(!g.children.length){
+  for(let i=0;i<30;i++){
+   let inp=document.createElement("input");
+   inp.className="numcell "+(i<10?"green":i<20?"orange":"purple");
+   inp.maxLength=4;
+   inp.inputMode="numeric";
+   inp.placeholder=String(i+1).padStart(2,"0");
+   inp.setAttribute("aria-label","Result "+(i+1));
+   inp.addEventListener("input",()=>inp.value=inp.value.replace(/\D/g,"").slice(0,4));
+   g.appendChild(inp);
+  }
+ }
+
+ const o=document.getElementById("titliOptions");
+ if(!o.children.length){
+  symbols.forEach((s,i)=>{
+   let b=document.createElement("button");
+   b.className="option";
+   b.innerHTML="<span>"+s[0]+"</span>"+s[1];
+   b.onclick=()=>{
+    selectedTitli=i;
+    document.querySelectorAll(".option").forEach((x,j)=>x.classList.toggle("selected",i===j));
+   };
+   o.appendChild(b);
+  });
+ }
+
+ updateDrawTimeInputs();
+
+ if(!clockTimer)clockTimer=setInterval(tick,1000);
+ tick();
+}
+
+function startData(){
+ if(historyListener)db.ref(ROOT+"/history").off("value",historyListener);
+ if(settingsListener)db.ref(ROOT+"/settings").off("value",settingsListener);
+
+ historyListener=snap=>{
+  const data=snap.val()||{};
+  records=Object.keys(data).map(key=>({...data[key],firebaseKey:key}));
+  records.sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));
+  render();
+ };
+
+ db.ref(ROOT+"/history").on("value",historyListener,error=>{
+  alert("History read error: "+error.message);
+ });
+
+ settingsListener=snap=>{
+  const s=snap.val()||{};
+  schedule={
+   start:s.startTime||"09:00",
+   end:s.endTime||"22:00",
+   i2:Number(s.interval2D)||15,
+   i3:Number(s.interval3D)||15,
+   it:Number(s.intervalTitli)||5
+  };
+  document.getElementById("startTime").value=schedule.start;
+  document.getElementById("endTime").value=schedule.end;
+  document.getElementById("interval2d").value=schedule.i2;
+  document.getElementById("interval3d").value=schedule.i3;
+  document.getElementById("intervalTitli").value=schedule.it;
+  updateDrawTimeInputs();
+  renderUpcoming();
+ };
+
+ db.ref(ROOT+"/settings").on("value",settingsListener);
+
+ if(futureListener)db.ref(ROOT+"/futureDraws").off("value",futureListener);
+ futureListener=snap=>{
+  futureRecords=snap.val()||{};
+  renderFutureResults();
+ };
+ db.ref(ROOT+"/futureDraws").on("value",futureListener,error=>{
+  alert("Future results read error: "+error.message);
+ });
+}
+
+function showPage(id){
+ document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===id));
+ document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===id));
+ if(id==="history")renderHistory();
+ window.scrollTo(0,0);
+}
+
+document.getElementById("nav").addEventListener("click",e=>{
+ let b=e.target.closest("button[data-page]");
+ if(b)showPage(b.dataset.page);
+});
+
+function localDateValue(d=new Date()){
+ let z=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+ return z.toISOString().slice(0,16);
+}
+
+
+function istParts(date=new Date()){
+ const parts=new Intl.DateTimeFormat("en-GB",{
+  timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit",
+  hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"
+ }).formatToParts(date);
+ return Object.fromEntries(parts.map(x=>[x.type,x.value]));
+}
+function drawTimeLabel(date){
+ return date.toLocaleTimeString("en-IN",{
+  timeZone:"Asia/Kolkata",hour:"2-digit",minute:"2-digit",hour12:true
+ });
+}
+
+function upcomingDrawSlots(interval){
+ // Dropdown में केवल आज के operating window (09:00 AM–10:00 PM IST) के शेष draw दिखाएँ।
+ const slots=[];
+ const [sh,sm]=schedule.start.split(":").map(Number);
+ const [eh,em]=schedule.end.split(":").map(Number);
+ const startMinutes=sh*60+sm;
+ const endMinutes=eh*60+em;
+ const first=nextTime(interval);
+ const firstParts=istParts(first);
+ const dayKey=firstParts.year+"-"+firstParts.month+"-"+firstParts.day;
+ let slot=new Date(first);
+ // एक दिन में अधिकतम 24 घंटे के minute slots से सुरक्षा सीमा।
+ for(let i=0;i<1440;i++){
+  const p=istParts(slot);
+  const slotDay=p.year+"-"+p.month+"-"+p.day;
+  const minutes=Number(p.hour)*60+Number(p.minute);
+  if(slotDay!==dayKey || minutes>endMinutes)break;
+  if(minutes>=startMinutes)slots.push(new Date(slot));
+  const wall=new Date(Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute+interval,0,0));
+  slot=new Date(wall.getTime()-330*60*1000);
+ }
+ // अगर आज का समय समाप्त हो चुका है, nextTime() अगले दिन 09:00 AM देता है।
+ return slots.length?slots:[first];
+}
+
+function closeTimePickers(exceptId=null){
+ document.querySelectorAll('.time-picker.open').forEach(p=>{
+  if(p.id!==exceptId){
+   p.classList.remove('open');
+   const trigger=p.querySelector('.time-picker-trigger');
+   if(trigger)trigger.setAttribute('aria-expanded','false');
+  }
+ });
+}
+
+function updateDrawTimeInputs(){
+ const fields=[
+  ['twoDtime',schedule.i2],
+  ['threeDtime',schedule.i3],
+  ['titlitime',schedule.it]
+ ];
+ fields.forEach(([id,interval])=>{
+  const hidden=document.getElementById(id);
+  const picker=document.getElementById(id+'Picker');
+  const trigger=document.getElementById(id+'Button');
+  const menu=document.getElementById(id+'Menu');
+  if(!hidden||!picker||!trigger||!menu)return;
+  const previous=hidden.value;
+  const slots=upcomingDrawSlots(interval);
+  menu.innerHTML=slots.map(date=>{
+   const value=date.toISOString();
+   const label=drawTimeLabel(date);
+   return '<button type="button" class="time-option" role="option" data-value="'+value+'">'+label+'</button>';
+  }).join('');
+  const valid=previous && slots.some(date=>date.toISOString()===previous);
+  hidden.value=valid?previous:slots[0].toISOString();
+  const selected=slots.find(date=>date.toISOString()===hidden.value)||slots[0];
+  trigger.innerHTML=drawTimeLabel(selected)+' <span aria-hidden="true">▾</span>';
+  menu.querySelectorAll('.time-option').forEach(option=>{
+   const isSelected=option.dataset.value===hidden.value;
+   option.classList.toggle('selected',isSelected);
+   option.setAttribute('aria-selected',String(isSelected));
+   option.addEventListener('click',()=>{
+    hidden.value=option.dataset.value;
+    trigger.innerHTML=option.textContent+' <span aria-hidden="true">▾</span>';
+    menu.querySelectorAll('.time-option').forEach(item=>{
+     const selectedNow=item.dataset.value===hidden.value;
+     item.classList.toggle('selected',selectedNow);
+     item.setAttribute('aria-selected',String(selectedNow));
+    });
+    closeTimePickers();
+   });
+  });
+  trigger.onclick=()=>{
+   const willOpen=!picker.classList.contains('open');
+   closeTimePickers();
+   if(willOpen){
+    picker.classList.add('open');
+    trigger.setAttribute('aria-expanded','true');
+   }
+  };
+ });
+}
+
+document.addEventListener('click',event=>{
+ if(!event.target.closest('.time-picker'))closeTimePickers();
+});
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape')closeTimePickers();
+});
+
+function fmt(t){
+ let d=new Date(t);
+ return d.toLocaleString("en-IN",{
+  timeZone:"Asia/Kolkata",day:"2-digit",month:"short",
+  year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true
+ });
+}
+
+function escapeHTML(value){
+ return String(value??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+async function addRecord(type,result,ref,time){
+ const now=Date.now();
+ const record={
+  type:type,
+  result:result,
+  ref:ref||"",
+  time:time?new Date(time).toISOString():new Date().toISOString(),
+  publishedAt:now,
+  status:"published"
+ };
+
+ const historyRef=db.ref(ROOT+"/history").push();
+ const updates={};
+ updates[ROOT+"/history/"+historyRef.key]=record;
+ updates[ROOT+"/current/"+type]={...record,historyKey:historyRef.key};
+ updates[ROOT+"/auditLog/"+db.ref(ROOT+"/auditLog").push().key]={
+  action:"PUBLISH",
+  type:type,
+  historyKey:historyRef.key,
+  timestamp:now,
+  adminUID:ADMIN_UID
+ };
+
+ await db.ref().update(updates);
+}
+
+function randomTwoDigits(){
+ return String(Math.floor(Math.random()*100)).padStart(2,"0");
+}
+function generate2DValues(){
+ const prefixes=[
+  ...Array.from({length:10},(_,i)=>10+i),
+  ...Array.from({length:10},(_,i)=>30+i),
+  ...Array.from({length:10},(_,i)=>50+i)
+ ];
+ const inputs=[...document.querySelectorAll("#twoDgrid input")];
+ prefixes.forEach((prefix,i)=>{inputs[i].value=String(prefix)+randomTwoDigits();});
+}
+function validate2DPrefixes(values){
+ const expected=[
+  ...Array.from({length:10},(_,i)=>String(10+i)),
+  ...Array.from({length:10},(_,i)=>String(30+i)),
+  ...Array.from({length:10},(_,i)=>String(50+i))
+ ];
+ return values.length===30 && values.every(v=>/^[0-9]{4}$/.test(v)) &&
+  expected.every(prefix=>values.filter(v=>v.slice(0,2)===prefix).length===1);
+}
+
+async function publish2D(){
+ const vals=[...document.querySelectorAll("#twoDgrid input")].map(x=>x.value.trim());
+ if(vals.some(x=>!/^[0-9]{4}$/.test(x))){
+  alert("कृपया सभी 30 बॉक्स में 4 अंकों का नंबर भरें।");
+  return;
+ }
+ if(!validate2DPrefixes(vals)){
+  alert("2D Prefix नियम जरूरी है: 10–19, 30–39 और 50–59 का हर prefix ठीक एक बार होना चाहिए। आखिरी दो अंक आप बदल सकते हैं।");
+  return;
+ }
+ if(!confirm("क्या आप इन 30 values को publish करना चाहते हैं?"))return;
+
+ try{
+  await addRecord("2D Fourth",vals,
+   document.getElementById("twoDref").value,
+   document.getElementById("twoDtime").value);
+  alert("2D result Firebase में publish हो गया।");
+  reset2D();
+ }catch(e){alert("Publish error: "+e.message);}
+}
+
+async function publish3D(){
+ let vals=["valA","valB","valC"].map(id=>document.getElementById(id).value.trim());
+ if(vals.some(x=>!/^[0-9]{3}$/.test(x))){
+  alert("A, B और C में 3-3 अंकों के नंबर भरें।");
+  return;
+ }
+ if(!confirm("क्या आप 3D result publish करना चाहते हैं?"))return;
+
+ try{
+  await addRecord("3D Result",
+   {A:vals[0],B:vals[1],C:vals[2]},
+   document.getElementById("threeDref").value,
+   document.getElementById("threeDtime").value);
+  alert("3D result Firebase में publish हो गया।");
+  reset3D();
+ }catch(e){alert("Publish error: "+e.message);}
+}
+
+async function publishTitli(){
+ if(selectedTitli<0){
+  alert("पहले एक विकल्प चुनें।");
+  return;
+ }
+ if(!confirm("क्या चुना हुआ Titli Goda विकल्प publish करना चाहते हैं?"))return;
+
+ try{
+  await addRecord("Titli Goda",
+   {emoji:symbols[selectedTitli][0],name:symbols[selectedTitli][1]},
+   document.getElementById("titliref").value,
+   document.getElementById("titlitime").value);
+  selectedTitli=-1;
+  document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+  alert("Titli Goda result Firebase में publish हो गया।");
+ }catch(e){alert("Publish error: "+e.message);}
+}
+
+function reset2D(){
+ document.querySelectorAll("#twoDgrid input").forEach(x=>x.value="");
+ document.getElementById("twoDref").value="";
+}
+function reset3D(){
+ ["valA","valB","valC","threeDref"].forEach(id=>document.getElementById(id).value="");
+}
+function clearTitli(){
+ selectedTitli=-1;
+ document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+}
+
+function displayResult(r){
+ if(r.type==="2D Fourth"){
+  return r.result.map((v,i)=>
+   '<span class="numcell '+(i<10?"green":i<20?"orange":"purple")+'">'+escapeHTML(v)+'</span>'
+  ).join("");
+ }
+ if(r.type==="3D Result"){
+  return "A: "+escapeHTML(r.result.A)+" · B: "+escapeHTML(r.result.B)+" · C: "+escapeHTML(r.result.C);
+ }
+ return escapeHTML(r.result.emoji)+" "+escapeHTML(r.result.name);
+}
+
+function render(){
+ document.getElementById("totalCount").textContent=records.length;
+ document.getElementById("count2d").textContent=records.filter(r=>r.type==="2D Fourth").length;
+ document.getElementById("count3d").textContent=records.filter(r=>r.type==="3D Result").length;
+ document.getElementById("countTitli").textContent=records.filter(r=>r.type==="Titli Goda").length;
+
+ let a=records.find(r=>r.type==="2D Fourth");
+ let b=records.find(r=>r.type==="3D Result");
+ let c=records.find(r=>r.type==="Titli Goda");
+
+ document.getElementById("latest2d").innerHTML=a?
+  '<div class="drawgrid">'+displayResult(a)+'</div><p class="sub">'+fmt(a.time)+'</p>':
+  "अभी कोई परिणाम प्रकाशित नहीं है।";
+
+ document.getElementById("latest3d").innerHTML=b?
+  '<div class="resultrow">'+["A","B","C"].map(k=>
+   '<div class="resultbox"><b>'+k+'</b><strong style="font-size:25px">'+escapeHTML(b.result[k])+'</strong></div>'
+  ).join("")+'</div><p class="sub">'+fmt(b.time)+'</p>':
+  "अभी कोई परिणाम प्रकाशित नहीं है।";
+
+ document.getElementById("latestTitli").innerHTML=c?
+  '<div style="font-size:34px">'+escapeHTML(c.result.emoji)+'</div><b>'+escapeHTML(c.result.name)+'</b><p class="sub">'+fmt(c.time)+'</p>':
+  "अभी कोई परिणाम प्रकाशित नहीं है।";
+
+ renderHistory();
+ renderUpcoming();
+}
+
+function renderHistory(){
+ let body=document.getElementById("historyRows");
+ body.innerHTML=records.map(r=>{
+  let result=r.type==="2D Fourth"?r.result.join(", "):
+   r.type==="3D Result"?
+   "A "+r.result.A+" / B "+r.result.B+" / C "+r.result.C:
+   r.result.emoji+" "+r.result.name;
+
+  return "<tr><td>"+fmt(r.time)+"</td><td>"+escapeHTML(r.type)+
+   "</td><td>"+escapeHTML(result)+"</td><td>"+escapeHTML(r.ref||"—")+
+   '</td><td><span class="pill locked">Published</span></td></tr>';
+ }).join("");
+
+ document.getElementById("historyEmpty").style.display=records.length?"none":"block";
+}
+
+function nextTime(interval){
+  // Calculate the next draw using India Standard Time (Asia/Kolkata).
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+  }).formatToParts(now);
+  const p = Object.fromEntries(parts.map(part => [part.type, part.value]));
+
+  // Build an IST calendar value using UTC fields to avoid device timezone errors.
+  const istNow = new Date(Date.UTC(
+    Number(p.year), Number(p.month) - 1, Number(p.day),
+    Number(p.hour), Number(p.minute), 0, 0
+  ));
+
+  const [sh, sm] = schedule.start.split(":").map(Number);
+  const [eh, em] = schedule.end.split(":").map(Number);
+  const startMinutes = sh * 60 + sm;
+  const endMinutes = eh * 60 + em;
+  const currentMinutes = istNow.getUTCHours() * 60 + istNow.getUTCMinutes();
+
+  let target = new Date(istNow);
+
+  if (currentMinutes < startMinutes) {
+    target.setUTCHours(sh, sm, 0, 0);
+  } else if (currentMinutes >= endMinutes) {
+    target.setUTCDate(target.getUTCDate() + 1);
+    target.setUTCHours(sh, sm, 0, 0);
+  } else {
+    const elapsed = currentMinutes - startMinutes;
+    const nextMinutes = startMinutes + (Math.floor(elapsed / interval) + 1) * interval;
+
+    if (nextMinutes > endMinutes) {
+      target.setUTCDate(target.getUTCDate() + 1);
+      target.setUTCHours(sh, sm, 0, 0);
+    } else {
+      target.setUTCHours(
+        Math.floor(nextMinutes / 60),
+        nextMinutes % 60,
+        0,
+        0
+      );
+    }
+  }
+
+  // Convert the IST wall-clock value to the corresponding real instant (UTC+05:30).
+  return new Date(target.getTime() - 330 * 60 * 1000);
+}
+
+function renderUpcoming(){
+ let rows=[["2D Fourth",schedule.i2],["3D Result",schedule.i3],["Titli Goda",schedule.it]];
+ document.getElementById("upcoming").innerHTML=rows.map(x=>
+  "<tr><td>"+x[0]+"</td><td>"+x[1]+" minutes</td><td>"+
+  drawTimeLabel(nextTime(x[1]))+"</td></tr>"
+ ).join("");
+}
+
+let lastUpcomingRefresh=0;
+function tick(){
+ document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-IN",{
+  timeZone:"Asia/Kolkata",hour12:true
+ });
+ const now=Date.now();
+ if(now-lastUpcomingRefresh>=60000){
+  renderUpcoming();
+  lastUpcomingRefresh=now;
+ }
+}
+
+async function saveSchedule(){
+ let start=document.getElementById("startTime").value||"09:00";
+ let end=document.getElementById("endTime").value||"22:00";
+ let i2=Math.max(1,+document.getElementById("interval2d").value||15);
+ let i3=Math.max(1,+document.getElementById("interval3d").value||15);
+ let it=Math.max(1,+document.getElementById("intervalTitli").value||5);
+
+ if(start>=end){
+  alert("End time, Start time से आगे होना चाहिए।");
+  return;
+ }
+
+ try{
+  await db.ref(ROOT+"/settings").update({
+   timezone:"Asia/Kolkata",
+   startTime:start,
+   endTime:end,
+   interval2D:i2,
+   interval3D:i3,
+   intervalTitli:it
+  });
+  updateDrawTimeInputs();
+   renderUpcoming();
+   alert("Schedule settings Firebase में save हो गईं।");
+ }catch(e){alert("Settings error: "+e.message);}
+}
+
+function futureResultText(item){
+ if(item.type==="2D Fourth")return Array.isArray(item.result)?item.result.join(", "):"Invalid 2D data";
+ if(item.type==="3D Result")return item.result?`A ${item.result.A} / B ${item.result.B} / C ${item.result.C}`:"Invalid 3D data";
+ return item.result?`${item.result.emoji||""} ${item.result.name||""}`:"Invalid result";
+}
+function renderFutureResults(){
+ const body=document.getElementById("futureRows"); if(!body)return;
+ const entries=Object.entries(futureRecords).filter(([,v])=>v).sort((a,b)=>(a[1].drawAt||0)-(b[1].drawAt||0)).slice(0,150);
+ body.innerHTML=entries.map(([key,item])=>`<tr><td>${escapeHTML(fmt(item.drawAt||Date.now()))}</td><td>${escapeHTML(item.type||"")}</td><td style="max-width:320px;white-space:normal">${escapeHTML(futureResultText(item))}</td><td><span class="pill">${escapeHTML(item.status||"scheduled")}</span></td><td>${item.status==="scheduled" && item.drawAt>Date.now()?`<button class="smallbtn" onclick="editFutureResult('${escapeHTML(key)}')">Edit</button>`:"—"}</td></tr>`).join("");
+ document.getElementById("futureEmpty").style.display=entries.length?"none":"block";
+}
+async function editFutureResult(key){
+ const item=futureRecords[key]; if(!item||item.status!=="scheduled"||item.drawAt<=Date.now()){alert("यह draw edit नहीं किया जा सकता।");return;}
+ let result;
+ if(item.type==="2D Fourth"){
+  const text=prompt("30 चार-अंकों के नंबर comma से अलग करके लिखें। Prefix क्रम: 10–19, 30–39, 50–59 (हर prefix एक बार)।",(item.result||[]).join(","));
+  if(text===null)return; result=text.split(",").map(x=>x.trim());
+  const expected=[...Array.from({length:10},(_,i)=>String(10+i)),...Array.from({length:10},(_,i)=>String(30+i)),...Array.from({length:10},(_,i)=>String(50+i))];
+  if(result.length!==30||result.some(x=>!/^[0-9]{4}$/.test(x))||expected.some(p=>result.filter(x=>x.slice(0,2)===p).length!==1)){alert("गलत 2D डेटा। सभी 30 नंबर चार अंकों के हों और हर तय prefix ठीक एक बार हो।");return;}
+ }else if(item.type==="3D Result"){
+  const text=prompt("A,B,C के 3-अंकों के नंबर comma से लिखें।",[item.result.A,item.result.B,item.result.C].join(","));
+  if(text===null)return;const a=text.split(",").map(x=>x.trim());if(a.length!==3||a.some(x=>!/^[0-9]{3}$/.test(x))){alert("A, B और C के लिए तीन 3-अंकों के नंबर जरूरी हैं।");return;}result={A:a[0],B:a[1],C:a[2]};
+ }else{
+  const names=symbols.map(x=>x[1]);const text=prompt("Titli Goda विकल्प का नाम लिखें: "+names.join(", "),item.result.name);if(text===null)return;const idx=symbols.findIndex(x=>x[1].toLowerCase()===text.trim().toLowerCase());if(idx<0){alert("यह विकल्प सूची में नहीं है।");return;}result={emoji:symbols[idx][0],name:symbols[idx][1]};
+ }
+ if(!confirm("इस future draw का परिणाम अपडेट करें?"))return;
+ try{await db.ref(ROOT+"/futureDraws/"+key).update({result,editedAt:Date.now(),editedBy:auth.currentUser.uid});await db.ref(ROOT+"/auditLog").push({action:"EDIT_FUTURE_DRAW",drawKey:key,type:item.type,timestamp:Date.now(),adminUID:auth.currentUser.uid});alert("Future result अपडेट हो गया।");}
+ catch(e){alert("Edit error: "+e.message);}
+}
+
+function exportCSV(){
+ let rows=[["Date & time","Section","Result","Reference","Status"]];
+ records.forEach(r=>{
+  let result=r.type==="2D Fourth"?r.result.join(" "):
+   r.type==="3D Result"?
+   "A "+r.result.A+" B "+r.result.B+" C "+r.result.C:
+   r.result.name;
+  rows.push([fmt(r.time),r.type,result,r.ref||"","Published"]);
+ });
+
+ let csv=rows.map(row=>row.map(v=>
+  '"'+String(v).replace(/"/g,'""')+'"'
+ ).join(",")).join("\n");
+
+ let blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});
+ let url=URL.createObjectURL(blob);
+ let a=document.createElement("a");
+ a.href=url;
+ a.download="playwin-result-history.csv";
+ a.click();
+ URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
