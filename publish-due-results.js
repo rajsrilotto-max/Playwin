@@ -29,8 +29,8 @@ async function main() {
   let published = 0, skipped = 0;
 
   for (const [futureKey, item] of Object.entries(future)) {
-    if (!item || item.status !== "scheduled" || !Number(item.drawAt) || Number(item.drawAt) > now) continue;
-    if (!item.type || !item.result) { skipped++; continue; }
+    if (!item || item.status !== "scheduled" || !Number.isFinite(Number(item.drawAt)) || Number(item.drawAt) <= 0 || Number(item.drawAt) > now) continue;
+    if (!item.type || !item.result) { skipped++; console.log("SKIP_INVALID_DRAW", futureKey, JSON.stringify({type:item.type, drawAt:item.drawAt, hasResult:!!item.result})); continue; }
 
     const historyKey = safeKey(item.type, item.drawAt);
     const record = {
@@ -102,6 +102,6 @@ async function main() {
   }
 
   if (Object.keys(cleanup).length) await db.ref().update(cleanup);
-  console.log(JSON.stringify({ checkedAt: now, published, skipped, retainedSinceIST: new Date(cutoff).toISOString(), deletedHistory, deletedDemoHistory: deletedDemo, deletedOldPublishedFuture: deletedFuture }, null, 2));
+  console.log(JSON.stringify({ event: process.env.GITHUB_EVENT_NAME || "unknown", checkedAt: now, checkedAtIST: new Date(now).toLocaleString("en-IN", {timeZone:"Asia/Kolkata"}), duePublisher: true, published, skipped, retainedSinceIST: new Date(cutoff).toISOString(), deletedHistory, deletedDemoHistory: deletedDemo, deletedOldPublishedFuture: deletedFuture }, null, 2));
 }
 main().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1);});
