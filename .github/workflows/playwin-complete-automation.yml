@@ -22,18 +22,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "20"
 
       - name: Install Firebase Admin SDK
         run: npm install --no-save firebase-admin
 
-      # Run the daily generator at 08:00 IST.
-      # On a manual run, this step also runs for testing.
       - name: Generate daily future draws
         if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 2 * * *'
         env:
@@ -41,8 +39,6 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
         run: node generate-results.js
 
-      # Run the publisher every 5 minutes.
-      # On a manual run, this step also runs for testing.
       - name: Publish due future draws
         if: github.event_name == 'workflow_dispatch' || github.event.schedule == '*/5 * * * *'
         env:
