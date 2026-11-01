@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d2c">
+<title>PlayWin – User Results</title>
+<style>
+:root{
+ --bg:#080d2c;--panel:#111735;--line:#303858;--text:#f2f4ff;
+ --muted:#b7bfdc;--green:#126b50;--orange:#a85d13;--purple:#68449b;
+ --pink:#e71955;--teal:#08bf83;--gold:#ffbf42;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,system-ui,sans-serif;min-height:100vh}
+header{background:linear-gradient(115deg,#80d9f4,#b4c8ff);color:#08133a;text-align:center;padding:25px 16px 22px}
+.logo{font-size:28px;font-weight:900}
+header h1{font-size:30px;margin:8px 0 3px}
+header p{font-size:15px;font-weight:800;color:#31566b;margin:0}
+.marquee{background:#28a9e4;color:#071c45;font-weight:800;white-space:nowrap;overflow:hidden;padding:11px 0;font-size:14px}
+.marquee span{display:inline-block;padding-left:100%;animation:move 18s linear infinite}
+@keyframes move{to{transform:translateX(-100%)}}
+main{width:min(100%,760px);margin:auto;padding:22px 14px 36px}
+.menu{display:grid;gap:13px}
+.menu button{width:100%;display:flex;justify-content:space-between;align-items:center;border:0;border-radius:15px;padding:21px 20px;color:white;font-size:19px;font-weight:800;min-height:70px;cursor:pointer}
+.m2{background:linear-gradient(110deg,#f21c58,#b60043)}
+.m3{background:linear-gradient(110deg,#08c77d,#0788bb)}
+.mt{background:linear-gradient(110deg,#ff9f00,#b65b00)}
+.chev{font-size:29px}
+.menu-label{text-align:center;color:#aeb8d7;letter-spacing:4px;font-size:12px;font-weight:900;margin:13px 0 0}
+.chart-btn{background:#171d40!important;border:1px solid #454969!important;font-size:16px!important;min-height:58px!important}
+.page{display:none}
+.page.active{display:block}
+.back{border:1px solid #566080;background:#1a2346;color:white;border-radius:9px;padding:10px 14px;font-weight:700;margin-bottom:15px;cursor:pointer}
+.page-title{text-align:center;font-size:20px;letter-spacing:1px;margin:2px 0 16px}
+.panel{background:var(--panel);border:1px solid #272f55;border-radius:14px;padding:14px;margin:12px 0}
+.panel-title{text-align:center;font-size:16px;font-weight:800;margin:2px 0 13px}
+.meta{color:var(--muted);font-size:12px;text-align:center;margin-top:11px}
+.empty{padding:22px 8px;text-align:center;color:var(--muted);font-size:14px}
+.grid2d{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.num{min-width:0;text-align:center;padding:9px 1px;border-radius:5px;font-size:clamp(8px,2.5vw,13px);font-weight:900;letter-spacing:-.3px;color:#fff;overflow:hidden}
+.num.g{background:var(--green);border:1px solid #239b76}
+.num.o{background:var(--orange);border:1px solid #d98a32}
+.num.p{background:var(--purple);border:1px solid #9675c8}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.three-card{background:#0b1430;border:1px solid #168b68;border-radius:10px;text-align:center;padding:16px 4px}
+.three-card b{display:block;color:#aeb8d7;font-size:12px;margin-bottom:8px}
+.three-card strong{font-size:clamp(21px,6vw,29px);color:#ffcf45}
+.titli-result{font-size:28px;font-weight:900;text-align:center;padding:18px 5px}
+.history-item{border-bottom:1px solid var(--line);padding:12px 2px}
+.history-item:last-child{border:0}
+.history-name{font-weight:800;font-size:13px;margin-bottom:7px}
+.history-date{font-size:11px;color:var(--muted);margin-top:7px}
+.history-2d{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px}
+.history-2d span{font-size:clamp(7px,2.1vw,11px);font-weight:800;text-align:center;padding:5px 0;border-radius:4px;background:#1a2748}
+.history-3d{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.history-3d span{text-align:center;background:#0b1430;border-radius:6px;padding:7px 2px;font-size:12px}
+.history-3d b{color:#aeb8d7}
+.history-titli{text-align:center;font-weight:800;padding:5px}
+footer{text-align:center;color:#9ba7c8;padding:28px 12px 18px;font-size:12px}
+@media(min-width:560px){main{padding-left:22px;padding-right:22px}.grid2d{gap:7px}.num{padding:12px 2px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">🏆 PlayWin</div>
+ <h1>PlayWin</h1>
+ <p>Play Game for Fun Only</p>
+</header>
+<div class="marquee"><span>🎉 Welcome to PlayWin — Play &amp; Win! • Welcome to PlayWin — Play &amp; Win! •</span></div>
+
+<main>
+ <nav class="menu" id="homeMenu">
+  <button class="m2" onclick="openPage('2D Fourth')"><span>2D Result</span><span class="chev">›</span></button>
+  <button class="m3" onclick="openPage('3D Result')"><span>3D Result</span><span class="chev">›</span></button>
+  <button class="mt" onclick="openPage('Titli Goda')"><span>Titli Goda</span><span class="chev">›</span></button>
+  <div class="menu-label">CHARTS</div>
+  <button class="chart-btn" onclick="openPage('2D Fourth')"><span>2D Chart</span><span class="chev">›</span></button>
+  <button class="chart-btn" onclick="openPage('3D Result')"><span>3D Chart</span><span class="chev">›</span></button>
+  <button class="chart-btn" onclick="openPage('Titli Goda')"><span>Titli Goda Chart</span><span class="chev">›</span></button>
+ </nav>
+
+ <section class="page" id="resultPage">
+  <button class="back" onclick="goHome()">← Back</button>
+  <h2 class="page-title" id="pageTitle"></h2>
+  <div class="panel">
+   <div class="panel-title">LATEST RESULT</div>
+   <div id="latestResult"><div class="empty">Loading result...</div></div>
+   <div class="meta" id="latestDate"></div>
+  </div>
+  <div class="panel">
+   <div class="panel-title">PREVIOUS RESULTS</div>
+   <div id="history"><div class="empty">Loading history...</div></div>
+  </div>
+ </section>
+</main>
+
+<footer>ⓘ Play Game for Fun Only<br><br>Copyright PlayWin. All Rights Reserved.</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig={
+ apiKey:"AIzaSyAvQ7A75xXsLMJU3KggC_2BcMsf1dQS2kc",
+ authDomain:"playwinlotto-e5808.firebaseapp.com",
+ databaseURL:"https://playwinlotto-e5808-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId:"playwinlotto-e5808",
+ storageBucket:"playwinlotto-e5808.firebasestorage.app",
+ messagingSenderId:"195315009776",
+ appId:"1:195315009776:web:30dfd6850a5cfa7f205a35"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+const ROOT="playwinV2";
+let records=[];
+let activeType="2D Fourth";
+
+const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[ch]));
+
+function dateText(value){
+ if(value===undefined||value===null||value==="")return "";
+ let d=typeof value==="number"?new Date(value):new Date(value);
+ if(isNaN(d.getTime()))return "";
+ return d.toLocaleString("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true});
+}
+function sortTime(r){
+ const v=r.publishedAt??r.time??0;
+ if(typeof v==="number")return v;
+ const parsed=Date.parse(v);
+ return Number.isNaN(parsed)?0:parsed;
+}
+function latestOf(type){return records.filter(r=>r.type===type).sort((a,b)=>sortTime(b)-sortTime(a))[0]||null;}
+
+function render2D(result){
+ if(!Array.isArray(result)||result.length!==30){
+  return '<div class="empty">2D result is not available in the expected 30-number format.</div>';
+ }
+ return '<div class="grid2d">'+result.map((n,i)=>{
+  const color=i<10?"g":i<20?"o":"p";
+  return '<div class="num '+color+'">'+esc(n)+'</div>';
+ }).join("")+'</div>';
+}
+function render3D(result){
+ if(!result||typeof result!=="object")return '<div class="empty">3D result not available.</div>';
+ return '<div class="three">'+["A","B","C"].map(k=>
+  '<div class="three-card"><b>RESULT '+k+'</b><strong>'+esc(result[k]||"---")+'</strong></div>'
+ ).join("")+'</div>';
+}
+function renderTitli(result){
+ if(!result||typeof result!=="object")return '<div class="empty">Titli Goda result not available.</div>';
+ return '<div class="titli-result">'+esc(result.emoji||"🦋")+' '+esc(result.name||"")+'</div>';
+}
+function resultMarkup(type,result){
+ if(type==="2D Fourth")return render2D(result);
+ if(type==="3D Result")return render3D(result);
+ if(type==="Titli Goda")return renderTitli(result);
+ return '<div class="empty">Result unavailable.</div>';
+}
+function historyMarkup(r){
+ let body="";
+ if(r.type==="2D Fourth"){
+  if(!Array.isArray(r.result)||r.result.length!==30)return "";
+  body='<div class="history-2d">'+r.result.map((n,i)=>'<span style="color:'+(i<10?'#63e8ba':i<20?'#ffc17a':'#d1baff')+'">'+esc(n)+'</span>').join("")+'</div>';
+ }else if(r.type==="3D Result"){
+  body='<div class="history-3d">'+["A","B","C"].map(k=>'<span><b>'+k+'</b> '+esc(r.result?.[k]||"---")+'</span>').join("")+'</div>';
+ }else if(r.type==="Titli Goda"){
+  body='<div class="history-titli">'+esc(r.result?.emoji||"🦋")+' '+esc(r.result?.name||"")+'</div>';
+ }
+ return '<div class="history-item"><div class="history-name">'+esc(r.type)+'</div>'+body+'<div class="history-date">'+dateText(r.time??r.publishedAt)+'</div></div>';
+}
+function renderPage(){
+ const current=latestOf(activeType);
+ document.getElementById("pageTitle").textContent=activeType==="2D Fourth"?"2D FOURTH RESULT":activeType.toUpperCase()+" RESULT";
+ document.getElementById("latestResult").innerHTML=current?resultMarkup(activeType,current.result):'<div class="empty">No published result yet.</div>';
+ document.getElementById("latestDate").textContent=current?dateText(current.time??current.publishedAt):"";
+ const previous=records.filter(r=>r.type===activeType).sort((a,b)=>sortTime(b)-sortTime(a)).slice(1,21);
+ document.getElementById("history").innerHTML=previous.length?previous.map(historyMarkup).join(""):'<div class="empty">No previous results available.</div>';
+}
+function openPage(type){
+ activeType=type;
+ document.getElementById("homeMenu").style.display="none";
+ document.getElementById("resultPage").classList.add("active");
+ renderPage();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function goHome(){
+ document.getElementById("resultPage").classList.remove("active");
+ document.getElementById("homeMenu").style.display="grid";
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+db.ref(ROOT+"/history").on("value",snapshot=>{
+ const data=snapshot.val()||{};
+ records=Object.entries(data).map(([firebaseKey,value])=>({...value,firebaseKey}))
+  .filter(r=>r&&typeof r==="object"&&["2D Fourth","3D Result","Titli Goda"].includes(r.type))
+  .sort((a,b)=>sortTime(b)-sortTime(a));
+ if(document.getElementById("resultPage").classList.contains("active"))renderPage();
+},error=>{
+ document.getElementById("latestResult").innerHTML='<div class="empty">Could not load results: '+esc(error.message)+'</div>';
+ document.getElementById("history").innerHTML="";
+});
+</script>
+</body>
+</html>
