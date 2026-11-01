@@ -1,0 +1,48 @@
+name: PlayWin Complete Automation
+
+on:
+  schedule:
+    # Daily draw generation: 08:00 AM India time (02:30 UTC)
+    - cron: "30 2 * * *"
+    # Publish due draws every 5 minutes
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playwin-complete-automation
+  cancel-in-progress: false
+
+jobs:
+  playwin-automation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "20"
+
+      - name: Install Firebase Admin SDK
+        run: npm install --no-save firebase-admin
+
+      - name: Generate daily future draws
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 2 * * *'
+        env:
+          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+        run: node generate-results.js
+
+      - name: Publish due future draws
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '*/5 * * * *'
+        env:
+          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+        run: node publish-due-results.js
+        
