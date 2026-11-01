@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d2c">
+<title>PlayWin – Results</title>
+<style>
+:root{--bg:#080d2c;--panel:#151a3b;--line:#454969;--text:#f2f4ff;--muted:#b7bfdc;--pink:#e71955;--green:#08bf83;--orange:#f39800;--blue:#078fc1;--gold:#ffbf42}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,system-ui,sans-serif}
+.hero{background:linear-gradient(115deg,#80d9f4,#b4c8ff);color:#08133a;text-align:center;padding:30px 16px 26px}
+.logo{font-size:30px;font-weight:900}.hero h1{font-size:36px;margin:14px 0 4px}.hero p{font-size:22px;font-weight:800;color:#31566b;margin:0}
+.marquee{background:#28a9e4;color:#071c45;font-weight:800;white-space:nowrap;overflow:hidden;padding:14px 0;font-size:17px}
+.marquee span{display:inline-block;padding-left:100%;animation:move 18s linear infinite}@keyframes move{to{transform:translateX(-100%)}}
+main{max-width:900px;margin:auto;padding:28px 20px 48px}
+.menu{display:grid;gap:16px;margin-bottom:44px}.menu a{display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:white;border-radius:19px;padding:28px;font-size:20px;font-weight:800;min-height:92px}
+.m2{background:linear-gradient(110deg,#f21c58,#b60043)}.m3{background:linear-gradient(110deg,#08c77d,#0788bb)}.mt{background:linear-gradient(110deg,#ff9f00,#b65b00)}
+.chev{font-size:32px}
+.section-title{display:flex;align-items:center;gap:20px;letter-spacing:6px;font-weight:900;text-align:center;margin:0 0 24px}.section-title:before,.section-title:after{content:"";height:2px;background:#555875;flex:1}
+.charts{display:grid;gap:16px;margin-bottom:42px}.charts button{background:#171d40;border:2px solid #454969;border-radius:18px;padding:25px;color:white;text-align:left;font-size:19px;font-weight:800}
+.charts button span{float:right;color:var(--gold);font-size:26px}
+h2{font-size:21px;margin:38px 0 18px}.panel{background:#111735;border:1px solid #272f55;border-radius:15px;padding:16px;margin:12px 0}
+.result-card{margin-bottom:12px}.meta{color:var(--muted);font-size:12px;margin-top:9px}
+.grid2d{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.num{padding:10px 2px;text-align:center;background:#1a2748;border-radius:7px;font-weight:800;font-size:13px}
+.num.g{color:#63e8ba;border:1px solid #168b68}.num.o{color:#ffc17a;border:1px solid #b86b24}.num.p{color:#d1baff;border:1px solid #7d60b6}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.three div{background:#0b1430;border:1px solid #333d66;border-radius:10px;text-align:center;padding:15px}.three b{display:block;color:#aeb8d7;font-size:12px;margin-bottom:7px}.three strong{font-size:24px}
+.history-row{border-bottom:1px solid #303858;padding:12px 0}.history-row:last-child{border:0}.muted{color:var(--muted)}.empty{padding:22px;text-align:center;color:var(--muted)}
+footer{text-align:center;color:#b7bfdc;padding:35px 12px 10px;font-weight:700}
+canvas{width:100%;height:220px;background:#0a1230;border-radius:12px}
+@media(min-width:650px){.menu{grid-template-columns:1fr}.charts{grid-template-columns:1fr}.grid2d{grid-template-columns:repeat(10,1fr)}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="logo">▶ 🏆 PlayWin</div>
+  <h1>PlayWin</h1><p>Play Game for Fun Only</p>
+</header>
+<div class="marquee"><span>🎉 Welcome to PlayWin — Play &amp; Win! • Welcome to PlayWin — Play &amp; Win! •</span></div>
+<main>
+  <nav class="menu">
+    <a class="m2" href="#latest2d">2D Result <span class="chev">›</span></a>
+    <a class="m3" href="#latest3d">3D Result <span class="chev">›</span></a>
+    <a class="mt" href="#latesttitli">Titli Goda Result <span class="chev">›</span></a>
+  </nav>
+  <div class="section-title">CHARTS</div>
+  <div class="charts">
+    <button onclick="showChart('2D Fourth')">2D Chart <span>›</span></button>
+    <button onclick="showChart('3D Result')">3D Chart <span>›</span></button>
+    <button onclick="showChart('Titli Goda')">Titli Goda Chart <span>›</span></button>
+  </div>
+  <section id="latest">
+    <h2>Latest published results</h2>
+    <div id="latest2d" class="panel result-card"><div class="empty">Loading results...</div></div>
+    <div id="latest3d" class="panel result-card"><div class="empty">Loading results...</div></div>
+    <div id="latesttitli" class="panel result-card"><div class="empty">Loading results...</div></div>
+  </section>
+  <section>
+    <h2>Recent result history</h2>
+    <div class="panel" id="history"><div class="empty">Loading history...</div></div>
+  </section>
+  <section id="chartPanel" style="display:none">
+    <h2 id="chartTitle">Result Chart</h2>
+    <div class="panel"><canvas id="chart" width="900" height="260"></canvas><p class="meta" id="chartNote"></p></div>
+  </section>
+</main>
+<footer>ⓘ Play Game for Fun Only<br><br><small>Copyright PlayWin. All Rights Reserved.</small></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig={
+ apiKey:"AIzaSyAvQ7A75xXsLMJU3KggC_2BcMsf1dQS2kc",
+ authDomain:"playwinlotto-e5808.firebaseapp.com",
+ databaseURL:"https://playwinlotto-e5808-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId:"playwinlotto-e5808",
+ storageBucket:"playwinlotto-e5808.firebasestorage.app",
+ messagingSenderId:"195315009776",
+ appId:"1:195315009776:web:30dfd6850a5cfa7f205a35"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database(),ROOT="playwinV2";
+let records=[];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function dateText(v){let d=new Date(v);return isNaN(d)? "":d.toLocaleString("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true})}
+function resultHTML(r){
+ if(!r)return '<div class="empty">No published result yet.</div>';
+ if(r.type==="2D Fourth" && Array.isArray(r.result))return '<div class="grid2d">'+r.result.map((v,i)=>'<span class="num '+(i<10?'g':i<20?'o':'p')+'">'+esc(v)+'</span>').join("")+'</div>';
+ if(r.type==="3D Result" && r.result)return '<div class="three">'+["A","B","C"].map(k=>'<div><b>RESULT '+k+'</b><strong>'+esc(r.result[k]||"---")+'</strong></div>').join("")+'</div>';
+ if(r.type==="Titli Goda" && r.result)return '<div style="font-size:30px;text-align:center">'+esc(r.result.emoji||"")+' <b>'+esc(r.result.name||"")+'</b></div>';
+ return '<div class="empty">Result data unavailable.</div>';
+}
+function latest(type){return records.find(r=>r.type===type)}
+function render(){
+ for(const [type,id] of [["2D Fourth","latest2d"],["3D Result","latest3d"],["Titli Goda","latesttitli"]]){
+  const r=latest(type);document.getElementById(id).innerHTML='<b>'+type+'</b>'+resultHTML(r)+(r?'<div class="meta">'+dateText(r.time||r.publishedAt)+'</div>':'');
+ }
+ const items=records.slice(0,20);
+ document.getElementById("history").innerHTML=items.length?items.map(r=>'<div class="history-row"><b>'+esc(r.type)+'</b><div>'+ (r.type==="2D Fourth" && Array.isArray(r.result)?esc(r.result.join(" · ")):r.type==="3D Result"?('A '+esc(r.result?.A)+' · B '+esc(r.result?.B)+' · C '+esc(r.result?.C)):esc((r.result?.emoji||"")+' '+(r.result?.name||"")))+'</div><div class="meta">'+dateText(r.time||r.publishedAt)+'</div></div>').join(""):'<div class="empty">No history available.</div>';
+}
+db.ref(ROOT+"/history").orderByChild("publishedAt").limitToLast(100).on("value",snap=>{
+ const d=snap.val()||{};records=Object.entries(d).map(([firebaseKey,r])=>({...r,firebaseKey})).sort((a,b)=>(b.publishedAt||0)-(a.publishedAt||0));render();
+},err=>{document.getElementById("history").innerHTML='<div class="empty">Could not load history: '+esc(err.message)+'</div>';});
+db.ref(ROOT+"/current").on("value",snap=>{
+ const cur=snap.val()||{};
+ for(const [type,r] of Object.entries(cur)){if(r && !records.some(x=>x.historyKey===r.historyKey && r.historyKey)){}}
+},()=>{});
+function showChart(type){
+ const selected=records.filter(r=>r.type===type).slice(0,20).reverse();
+ document.getElementById("chartPanel").style.display="block";
+ document.getElementById("chartTitle").textContent=type+" Chart";
+ const c=document.getElementById("chart"),ctx=c.getContext("2d");ctx.clearRect(0,0,c.width,c.height);
+ ctx.fillStyle="#0a1230";ctx.fillRect(0,0,c.width,c.height);
+ ctx.strokeStyle="#394365";ctx.lineWidth=1;
+ for(let i=0;i<5;i++){let y=25+i*48;ctx.beginPath();ctx.moveTo(35,y);ctx.lineTo(880,y);ctx.stroke();}
+ let vals=selected.map(r=>{
+  if(type==="2D Fourth")return Number(String(r.result?.[0]||"0").slice(-2));
+  if(type==="3D Result")return Number(r.result?.A||0)%100;
+  return (r.result?.name||"").length*7;
+ });
+ if(vals.length){let max=Math.max(100,...vals),step=820/Math.max(1,vals.length-1);ctx.strokeStyle="#ffc14a";ctx.lineWidth=3;ctx.beginPath();vals.forEach((v,i)=>{let x=40+i*step,y=220-(v/max)*180;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();vals.forEach((v,i)=>{let x=40+i*step,y=220-(v/max)*180;ctx.fillStyle="#ffc14a";ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();});}
+ document.getElementById("chartNote").textContent=selected.length+" recent published draws. Chart uses published result values for display only.";
+ document.getElementById("chartPanel").scrollIntoView({behavior:"smooth"});
+}
+</script>
+</body>
+</html>
