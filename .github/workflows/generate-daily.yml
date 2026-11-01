@@ -1,0 +1,25 @@
+name: PlayWin - Generate Daily Future Results
+on:
+  schedule:
+    - cron: "30 2 * * *" # 08:00 Asia/Kolkata
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: playwin-daily-generation
+  cancel-in-progress: false
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Firebase Admin SDK
+        run: npm install firebase-admin
+      - name: Generate today's 2D, 3D and Titli future draws
+        env:
+          FIREBASE_DATABASE_URL: ${{ secrets.FIREBASE_DATABASE_URL }}
+          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+        run: node generate-results.js
